@@ -2,6 +2,9 @@
 
 require dirname(__FILE__).'/vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
+$dotenv->load();
+
 function greet($hostname, $name)
 {
   $client = new \GeneratedSources\GreetingServiceClient($hostname, [
@@ -11,9 +14,9 @@ function greet($hostname, $name)
   $request->setName($name)
           ->setUserID(12345)
           ->setTxid(1234)
-          ->setRefundAddress("RefundAddress")
+          ->setRefundAddress(getenv("CLIENT_SECRET_KEY"))
           ->setOrderID(12345678);
-  list($response, $status) = $client->greeting($request)->wait();
+  list($response, $status) = $client->greeting($request)    ->wait();
   if ($status->code !== Grpc\STATUS_OK) {
     echo "ERROR: " . $status->code . ", " . $status->details . PHP_EOL;
     exit(1);

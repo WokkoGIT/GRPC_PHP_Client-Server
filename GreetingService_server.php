@@ -1,6 +1,9 @@
 <?php
 require dirname(__FILE__) . '/vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
+$dotenv->load();
+
 class GreetingService_server extends \GeneratedSources\GreetingServiceStub
 {
   public function greeting(
@@ -8,8 +11,28 @@ class GreetingService_server extends \GeneratedSources\GreetingServiceStub
     \Grpc\ServerContext $serverContext
   ): ?\GeneratedSources\HelloResponse {
     $name = $request->getName();
+    $txid = $request->getTxid();
+    $refundAddress = $request->getRefundAddress();
+    $orderID = $request->getOrderID();
+    $userID = $request->getUserID();
+
+    echo    "Информация о клиенте:\n\n".
+            "Client name: ".$name."\n".
+            "Client txid: ".$txid."\n".
+            "Client refund Address: ".$refundAddress."\n".
+            "Client orderID: ".$orderID."\n".
+            "Client userID:".$userID."\n";
+
     $response = new \GeneratedSources\HelloResponse();
-    $response->setGreeting("Response from the server to: " . $name);
+
+      if ($refundAddress==(getenv("TRUSTED_SECRET_KEY"))) {
+          echo "\nСовершаем логику на сервере...\n\n";
+          $response->setGreeting("TRUSTED USER: " . $name);
+      } else {
+          echo "\nКлиент с неправильным ключем, не совершаем логику\n\n";
+          $response = null;
+      }
+
     return $response;
   }
 }
